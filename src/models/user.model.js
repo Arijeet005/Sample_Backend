@@ -1,0 +1,92 @@
+import mongoose, {Schema} from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
+const userScehma = new Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim:true,
+    index: true // used to optimise and enablin g of this searching field
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim:true
+  },
+  fullname: {
+    type: String,
+    required: true,
+    trim:true, 
+    index:true
+  },
+  avatar: {
+    type: String, // cloudanary url
+    required: true,
+  },
+  coverimage: {
+    type:String, // cloudnary url
+  },
+  watchHistory: [{
+    type: Schema.Types.ObjectId,
+    ref: "Video"
+  }
+  ],
+  pasword: {
+    type: String,
+    required: [true, 'password is required']
+  },
+  refresToken: {
+    type: String
+  }
+  
+  
+},{timestamps:true})
+
+userScehma.pre("save", async function (next) {
+    if(this.isModified("password")){
+    this.password = bcrypt.hash(this.password, 10)
+    next()}else{
+        return next();
+    }
+})
+
+userScehma.methods.isPasswordCorrect = async function(password){
+    await bcrypt.compare(password,this.password)
+}
+
+userScehma.methods.generateAcessToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.username ,
+            fullname: this.fullname
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+
+    )
+}
+
+
+userScehma.methods.generateRefreshToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+
+    )
+}
+
+export const User = mongoose.model("User", userScehma)
