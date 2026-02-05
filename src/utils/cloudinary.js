@@ -16,31 +16,14 @@ const uploadOnClodinary = async (localFilePath) => {
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
         })
-        //file has been 
-        console.log("file uploaded sucesfully")
+        //file has been uploaded sucesfully 
+        console.log("file uploaded sucesfully", response.url);
+        return response;
     } catch (error) {
-        
+        fs.unlinkSync(localFilePath) // remove the locally saved temporay file as the upload operation failed
+        return null;
     }
 }
 
-    // Upload an image
-     const uploadResult = await cloudinary.uploader
-       .upload(
-           'https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg', {
-               public_id: 'shoes',
-           }
-       )
-       .catch((error) => {
-           console.log(error);
-       });
-    
-    console.log(uploadResult);
-    
-    // Optimize delivery by resizing and applying auto-format and auto-quality
-    const optimizeUrl = cloudinary.url('shoes', {
-        fetch_format: 'auto',
-        quality: 'auto'
-    });
-    
-    console.log(optimizeUrl);
-    
+export {uploadOnClodinary}
+ 
