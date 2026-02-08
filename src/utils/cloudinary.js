@@ -9,7 +9,7 @@ cloudinary.config({
 
 
 
-const uploadOnClodinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null
         //uplaod the file to cloudinary
@@ -17,13 +17,15 @@ const uploadOnClodinary = async (localFilePath) => {
             resource_type: "auto"
         })
         //file has been uploaded sucesfully 
-        console.log("file uploaded sucesfully", response.url);
+        //console.log("file uploaded sucesfully", response.url);
+        fs.unlinkSync(localFilePath)
         return response;
     } catch (error) {
+        console.log("Cloudinary upload error:", error.message);
         fs.unlinkSync(localFilePath) // remove the locally saved temporay file as the upload operation failed
         return null;
     }
 }
 
-export {uploadOnClodinary}
+export {uploadOnCloudinary}
  

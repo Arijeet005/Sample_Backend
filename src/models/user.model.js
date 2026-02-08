@@ -36,7 +36,7 @@ const userScehma = new Schema({
     ref: "Video"
   }
   ],
-  pasword: {
+  password: {
     type: String,
     required: [true, 'password is required']
   },
@@ -47,16 +47,15 @@ const userScehma = new Schema({
   
 },{timestamps:true})
 
-userScehma.pre("save", async function (next) {
-    if(this.isModified("password")){
-    this.password =  await bcrypt.hash(this.password, 10)
-    next()}else{
-        return next();
-    }
-})
+userScehma.pre("save", async function () {
+    if (!this.isModified("password")) return;
+
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
 
 userScehma.methods.isPasswordCorrect = async function(password){
-    await bcrypt.compare(password,this.password)
+    return await bcrypt.compare(password,this.password)
 }
 
 userScehma.methods.generateAcessToken = function(){
